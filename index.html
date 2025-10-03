@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalonador de Notas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .config-group {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .config-group h3 {
+            color: #444;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .input-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-group {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+            width: 60px;
+        }
+
+        input[type="number"] {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1em;
+            width: 100px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .tables-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .tables-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #444;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        td input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        td input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .spreadsheet-container {
+            margin: 15px 0;
+        }
+
+        #spreadsheetInput {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            background: white;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        #spreadsheetInput:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .paste-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #1976d2;
+            text-align: center;
+        }
+
+        .parse-btn {
+            background: #17a2b8;
+            padding: 10px 25px;
+            font-size: 0.95em;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .parse-btn:hover {
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        }
+
+        .or-separator {
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+            position: relative;
+        }
+
+        .or-separator::before,
+        .or-separator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .or-separator::before {
+            left: 0;
+        }
+
+        .or-separator::after {
+            right: 0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .add-row-btn {
+            background: #28a745;
+            padding: 8px 20px;
+            font-size: 0.9em;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .add-row-btn:hover {
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .result-row {
+            background: #e8f5e9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .stats {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stats p {
+            margin: 5px 0;
+            color: #1976d2;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            padding: 10px 25px;
+            font-size: 0.95em;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            margin-top: 15px;
+        }
+
+        .copy-btn:hover {
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .copyright {
+            text-align: center;
+            white-space: pre-line;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Escalonador de Notas</h1>
+        <p style="text-align: center; margin-bottom: 30px; color: #666; font-size: 1em;">Defina os limites</p>
+
+        <div class="config-section">
+            <div class="config-grid">
+                <div class="config-group">
+                    <h3>Notas Originais</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="minOriginal">Menor:</label>
+                            <input type="number" id="minOriginal" min="0" max="10" step="0.1">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="maxOriginal">Maior:</label>
+                            <input type="number" id="maxOriginal" value="10" min="0" max="10" step="0.1">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-group">
+                    <h3>Notas Escalonadas</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="minScaled">Menor:</label>
+                            <input type="number" id="minScaled" value="7" min="0" max="10" step="0.1">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="maxScaled">Maior:</label>
+                            <input type="number" id="maxScaled" value="10" min="0" max="10" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tables-container">
+            <div class="table-section">
+                <h2>📝 Notas Originais</h2>
+                <div class="paste-info">
+                    💡 Dica: Você pode copiar e colar dados diretamente do Excel!
+                </div>
+                <div class="spreadsheet-container">
+                    <textarea id="spreadsheetInput" 
+                             placeholder="Cole aqui os dados do Excel (nome e nota separados por TAB)&#10;ou digite diretamente:&#10;&#10;João Silva    8.5&#10;Maria Santos    7.2&#10;Pedro Costa    9.0"
+                             rows="15"></textarea>
+                </div>
+                <div class="button-container">
+                    <button class="parse-btn" onclick="parseSpreadsheetData()">📋 Processar Dados Colados</button>
+                </div>
+                <div class="or-separator">ou use a tabela abaixo:</div>
+                <table id="inputTable">
+                    <thead>
+                        <tr>
+                            <th>Nome do Aluno</th>
+                            <th>Nota Original</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inputBody">
+                        <!-- 10 linhas iniciais -->
+                    </tbody>
+                </table>
+                <div class="button-container">
+                    <button class="add-row-btn" onclick="addRow()">+ Adicionar Linha</button>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <h2>✨ Notas Escalonadas</h2>
+                <div id="resultContainer">
+                    <div class="empty-state">As notas escalonadas aparecerão aqui</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button onclick="scaleGrades()">🚀 Escalonar Notas</button>
+        </div>
+        
+        <div class="copyright">
+            © 2025 Rodrigo Pereira
+            Faculdade de Filosofia, Ciências e Letras de Ribeirão Preto
+            Universidade de São Paulo
+        </div>
+    </div>
+
+    <script>
+        // Inicializar tabela com 10 linhas vazias
+        function initTable() {
+            const tbody = document.getElementById('inputBody');
+            for (let i = 0; i < 10; i++) {
+                addRow();
+            }
+        }
+
+        // Adicionar nova linha
+        function addRow() {
+            const tbody = document.getElementById('inputBody');
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="text" placeholder="Nome do aluno"></td>
+                <td><input type="number" placeholder="Nota" min="0" max="10" step="0.1"></td>
+            `;
+        }
+
+        // Processar dados colados do Excel
+        function parseSpreadsheetData() {
+            const textarea = document.getElementById('spreadsheetInput');
+            const data = textarea.value.trim();
+            
+            if (!data) {
+                alert('Por favor, cole os dados antes de processar!');
+                return;
+            }
+
+            // Limpar tabela atual
+            const tbody = document.getElementById('inputBody');
+            tbody.innerHTML = '';
+
+            // Processar linhas
+            const lines = data.split('\n');
+            lines.forEach((line, index) => {
+                if (line.trim()) {
+                    // Separar por TAB ou múltiplos espaços
+                    const parts = line.trim().split(/\t+|\s{2,}/);
+                    if (parts.length >= 2) {
+                        const name = parts.slice(0, -1).join(' ').trim();
+                        const grade = parts[parts.length - 1].replace(',', '.');
+                        
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td><input type="text" value="${name}" placeholder="Nome do aluno"></td>
+                            <td><input type="number" value="${grade}" placeholder="Nota" min="0" max="10" step="0.1"></td>
+                        `;
+                    }
+                }
+            });
+
+            // Adicionar algumas linhas vazias extras
+            for (let i = 0; i < 3; i++) {
+                addRow();
+            }
+
+            textarea.value = '';
+            alert('Dados processados com sucesso! Você pode editar na tabela se necessário.');
+        }
+
+        // Escalonar notas
+        function scaleGrades() {
+            const minOriginal = parseFloat(document.getElementById('minOriginal').value);
+            const maxOriginal = parseFloat(document.getElementById('maxOriginal').value);
+            const minScaled = parseFloat(document.getElementById('minScaled').value);
+            const maxScaled = parseFloat(document.getElementById('maxScaled').value);
+            
+            // Validar limites
+            if (minOriginal >= maxOriginal) {
+                alert('A nota mínima original deve ser menor que a nota máxima original!');
+                return;
+            }
+            
+            if (minScaled >= maxScaled) {
+                alert('A nota mínima escalonada deve ser menor que a nota máxima escalonada!');
+                return;
+            }
+
+            // Coletar dados da tabela
+            const rows = document.querySelectorAll('#inputBody tr');
+            const data = [];
+
+            rows.forEach(row => {
+                const nameInput = row.cells[0].querySelector('input');
+                const gradeInput = row.cells[1].querySelector('input');
+                
+                if (nameInput && gradeInput) {
+                    const name = nameInput.value.trim();
+                    const grade = parseFloat(gradeInput.value);
+                    
+                    if (name && !isNaN(grade)) {
+                        data.push({ name, grade });
+                    }
+                }
+            });
+
+            if (data.length === 0) {
+                alert('Por favor, insira pelo menos uma nota!');
+                return;
+            }
+
+            // Calcular notas escalonadas usando escalonamento linear
+            // y = a + b*x, onde b = (y2-y1)/(x2-x1)
+            // x1 = minOriginal, y1 = minScaled
+            // x2 = maxOriginal, y2 = maxScaled
+            const b = (maxScaled - minScaled) / (maxOriginal - minOriginal);
+            const a = minScaled - b * minOriginal;
+
+            const scaledData = data.map(student => {
+                // Aplicar transformação linear sem limitar aos bounds
+                const scaledGrade = a + b * student.grade;
+                
+                return {
+                    name: student.name,
+                    originalGrade: student.grade,
+                    scaledGrade: scaledGrade.toFixed(1)
+                };
+            });
+
+            // Exibir resultados
+            displayResults(scaledData, minOriginal, maxOriginal, minScaled, maxScaled);
+        }
+
+        // Exibir resultados
+        function displayResults(data, minOriginal, maxOriginal, minScaled, maxScaled) {
+            const container = document.getElementById('resultContainer');
+            
+            let html = `
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Nome do Aluno</th>
+                            <th>Nota Escalonada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(student => {
+                html += `
+                    <tr class="result-row">
+                        <td>${student.name}</td>
+                        <td><strong>${student.scaledGrade}</strong></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            html += '<div class="button-container"><button class="copy-btn" onclick="copyToExcel()">📋 Copiar para Excel</button></div>';
+            container.innerHTML = html;
+            
+            // Armazenar dados para a função de cópia
+            window.scaledData = data;
+        }
+
+        // Copiar dados para Excel
+        function copyToExcel() {
+            if (!window.scaledData || window.scaledData.length === 0) {
+                alert('Não há dados para copiar!');
+                return;
+            }
+
+            // Criar texto formatado para Excel
+            let excelText = 'Nome do Aluno\tNota Escalonada\n';
+            
+            window.scaledData.forEach(student => {
+                // Converter ponto para vírgula no número
+                const notaComVirgula = student.scaledGrade.replace('.', ',');
+                excelText += `${student.name}\t${notaComVirgula}\n`;
+            });
+
+            // Copiar para o clipboard
+            navigator.clipboard.writeText(excelText).then(() => {
+                // Feedback visual
+                const button = document.querySelector('.copy-btn');
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copiado!';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '#28a745';
+                }, 2000);
+            }).catch(err => {
+                alert('Erro ao copiar: ' + err);
+            });
+        }
+
+        // Inicializar quando a página carregar
+        window.onload = initTable;
+    </script>
+</body>
+</html>
